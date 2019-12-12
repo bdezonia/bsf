@@ -1,2 +1,2 @@
 # bsf
-BSF: The Big Simple File Format description
+BSF: The Big Simple File Format specification
