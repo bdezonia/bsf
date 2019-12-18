@@ -29,7 +29,7 @@ dimension n-1 : (a number within the granularity specified above) (and an equati
 <entity dimension 0 : UINT63>
 ...
 <entity dimension n-1 : UINT63>
-<>
+<all the numeric data follows here sequentially>
 
 Notes/questions
 - even though someone could be specifying UINT12's they take up two bytes. Again no form of compression is supported.
