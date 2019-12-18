@@ -18,7 +18,7 @@ BSF
  data>
 <some set of (C?) string key value pairs of metadata>
 number of dimensions (UINT63?)
-dimension granularity (UINT12, UINT31, UINT63, etc. up to UINT64K)
+dimension granularity (UINT12, UINT31, UINT63, etc. up to UINT65536)
 dimension 0 : (a number within the granularity specified above) (and an
  equation string specifying calibration)
 ...
@@ -27,25 +27,30 @@ dimension n-1 : (a number within the granularity specified above) (and
 <the type of numeric data entries that follow in subentities
   INT [numbits]
   UINT [numbits]
-  IEEE_FLOAT [8? or 16 or 32 or 64 or 128]
+  IEEE_FLOAT [numbits == 8? or 16 or 32 or 64 or 128]
   (some day: POSIT posit descriptors)
 >
 <subentity type: REAL(1) or COMPLEX(2) or QUATERNION(4) or OCTONION(8)>
-<entity dimension count: 0 = number, 1 = vector, 2 = matrix, 3 = tensor>
+<entity dimension count: 0 = number, 1 = vector, 2 = matrix, 3+ = tensor>
 <entity dimension 0 : UINT63>
 ...
 <entity dimension n-1 : UINT63>
-<all the numeric data follows here sequentially>
+<all the numeric data follows here sequentially. the order of elements
+ is dimension0/dimension1/dimension2/etc and within then by entity and
+ then by subentity. I will soon make an example that shows the order.
+ the dimension indices increase leftmost first. the entities also go
+ subentity dim 0 to subentity dim n-1.>
 
 Notes/questions
 - even though someone could be specifying UINT12's they take up two
     bytes. Again no form of compression is supported.
 - all numeric values are to be specified as running from high byte to
     lo byte. This simplifies the reading of the numbers into arbitrary
-    precision integers. You can read one byte and then shoft left 8 bits
+    precision integers. You can read one byte and then shift left 8 bits
     and read the next byte etc.
 - equation language must be laid out so that one knows how to parse.
-    but they could be ignored by anyone who wants to.
+    for example specify what functions are valid (sin? acos? erfc? etc.
+    but the calibration strings can be ignored by anyone who wants to.
 - ideally the numbers would be expandable: i.e. no fixed sizes (such as
     UINT63) for dim counts and dim sizes.
 - supporting this format requires arbitrary precision ints for sizes and
@@ -57,7 +62,7 @@ Notes/questions
     for the data. If you supported RGB and ARGB and YUV and CMYK and
     HSV/B you could reason what the 3 or 4 channels mean. Otherwise
     you'd just have one dimension that had value of 3 or 4 and you had
-    no idea the data is RGB or ARGB etc.
+    no idea the data is RGB or ARGB or YUV etc.
 - should I define a fixed record format so that a record can be of mixed
     types? The format would still be a bunch of fixed records but not
     just of one kind of number.
