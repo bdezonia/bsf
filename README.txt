@@ -4,40 +4,74 @@ version 0.0.1
 
 This document defines the Basic Simple Format file specification.
 
-Aims: define a simple to read format for numeric data. Accenting the
-simple part of the definition the data is laid out in a regular/fixed
+Aims: define a simple to read/write format for numeric data. Accenting
+the simple part of the definition the data is laid out in a regular/fixed
 format that is n-dimensional and uncompressed. (A simple file format
 should not require readers and writers to be complex enough to support
 compression)
 
+All numbers are stored in high byte first order (Big endian)
+
 Example pseudo format:
 
-BSF
-<version (C?) string i.e. "0.0.1" right now>
+"BSF" : file type marker string
+<15-bit unsigned number> (Major version)
+<15-bit unsigned number> (Minor version)
+<15-bit unsigned number> (Subminor version)
 <some set of (C?) string key value pairs of metadata>
-number of dimensions (UINT63?)
-dimension granularity (UINT12, UINT31, UINT63, etc. up to UINT65536)
-dimension 0 : (a number within the granularity specified above) (and an
- equation string specifying calibration)
+number of dimensions (unsigned 63 bit type)
+dimension granularity bit count (all dimensions are unsigned). This field
+  describes the number of bits each following dimension number takes up.
+  Valid values are 1 to 65536.
+dimension 0 : (a number of size specified by the within the granularity
+ specified above)
+equation string 0 (and an equation string specifying calibration)
+  it's a C? string. calibration can be ignored if desired. if calibration
+  is specified the equation language is specified below.
 ...
-dimension n-1 : (a number within the granularity specified above) (and
- an equation string specifying calibration)
+dimension n-1 : (a number within the granularity specified above)
+equation string n-1 (and an equation string specifying calibration)
 <the type of numeric data entries that follow in subentities
-  INT [numbits]
-  UINT [numbits]
+  INT [numbits between 1 and 65536]
+  UINT [numbits between 1 and 65536]
   IEEE_FLOAT [numbits == 8? or 16 or 32 or 64 or 128]
-  (some day: POSIT posit descriptors)
+  (some day: POSIT posit descriptors of some kind)
 >
-<subentity type: REAL(1) or COMPLEX(2) or QUATERNION(4) or OCTONION(8)>
-<entity dimension count: 0 = number, 1 = vector, 2 = matrix, 3+ = tensor>
-<entity dimension 0 : UINT63>
+<subentity type: 1 (REAL) or 2 (COMPLEX) or 4 (QUATERNION) or 8 (OCTONION)>
+<entity dimension count: UINT15 0 = number, 1 = vector, 2 = matrix, 3+ = tensor>
+<entity dimension granularity bit count: valid values are 1 to 2^64-1
+<entity dimension 0 : within entity dimension granularity>
 ...
-<entity dimension n-1 : UINT63>
+<entity dimension n-1 : within entity dimension granularity>
 <all the numeric data follows here sequentially. the order of elements
  is dimension0/dimension1/dimension2/etc and within then by entity and
  then by subentity. I will soon make an example that shows the order.
  the dimension indices increase leftmost first. the entities also go
  subentity dim 0 to subentity dim n-1.>
+ 
+   Example code that would work to read the data portion:
+   
+     // read the data header values
+     
+     for (uint63 i = 0; i < NUMDIMS; i++) {
+       read and store DIM value i
+       read and store DIM calibration equation string
+     }
+     read and store the subentity component type (such as INT12, or FLOAT64, etc)
+     read and store the number of components that make up a sub entity (1, 2, 4, or 8)
+     read and store the entity type dimension count
+        (i.e. 2 says the entities are 2-d matrices of 1, 2, 4, or 8 sub entities each)
+     read and store the ENTITY dim granularity (UINT63)
+     for i = 0 < entity type dim count
+       read and store the ENTITY_DIM
+       
+     // now read the data
+     
+     total entities = each DIM multiplied together
+     for bignum i = 0; i < tot entities; i++
+        // read an entity
+        for uint63 j = 0; j < 
+          TO BE CONTINUED
 
 Notes/questions
 - even though someone could be specifying UINT12's they take up two
@@ -50,8 +84,6 @@ Notes/questions
 - equation language must be laid out so that one knows how to parse.
     for example specify what functions are valid (sin? acos? erfc? etc.)
     but the calibration strings can be ignored by anyone who wants to.
-- ideally the numbers would be expandable: i.e. no fixed sizes (such as
-    UINT63) for dim counts and dim sizes.
 - supporting this format requires arbitrary precision ints for sizes and
     arbitrary precision floats for axis calibration / equation support.
 - how complex should the subentity codes be. The basic couple I've
