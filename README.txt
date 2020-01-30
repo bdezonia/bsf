@@ -1,6 +1,6 @@
 BSF: The Big Simple Format file specification
 
-version 0.0.1
+version 0.0.1 <add official release date here when satisfied>
 
 This document defines the Basic Simple Format file specification.
 
@@ -22,7 +22,9 @@ Example pseudo format:
 number of dimensions (unsigned 63 bit type)
 dimension granularity bit count (all dimensions are unsigned). This field
   describes the number of bits each following dimension number takes up.
-  Valid values are 1 to 65536.
+  Valid values are 1 to 65536. Each number is encoded to the nearest
+  8-bit boundary. So a value of 5 says store a 5 bit number in the next
+  8 bits.
 dimension 0 : (a number of size specified by the within the granularity
  specified above)
 equation string 0 (and an equation string specifying calibration)
@@ -69,9 +71,15 @@ equation string n-1 (and an equation string specifying calibration)
      
      total entities = each DIM multiplied together
      for bignum i = 0; i < tot entities; i++
-        // read an entity
-        for uint63 j = 0; j < 
-          TO BE CONTINUED
+       // read an entity
+       for uint63 d = 0; d < entity dim count
+         for the dims of the entity (for instance a 3x4 matrix)
+           for (se = 0; se < 1 or 2 or 4 or 8; se++) {
+             read a subentity component value (like the 1st component of a cmplx num)
+           }
+           make a sub entity from those read values (like a quat<float32>)
+           store the subentity at the right position within the entity
+             (e.g set vector[7] = subentity read)
 
 Notes/questions
 - even though someone could be specifying UINT12's they take up two
@@ -95,7 +103,8 @@ Notes/questions
     you'd just have one dimension that had value of 3 or 4 and you had
     no idea the data is RGB or ARGB or YUV etc. As I think more I believe
     that we should keep the type count minimized so no color model types.
-- should I define a fixed record format so that a record can be of mixed
-    types? The format would still be a bunch of fixed records but not
-    just of one kind of number. This would allow CMYK or YUV etc. but
-    there is no inferring from a record type that it is a CMYK etc.
+- should I define a fixed record format so that a record can be made of
+    a set of mixed types? The format would still be a bunch of fixed
+    records but not just of one kind of number. This would allow CMYK or
+    YUV etc. but there is no inferring from a record type that it is a
+    CMYK etc.
