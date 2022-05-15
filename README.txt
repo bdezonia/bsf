@@ -19,20 +19,14 @@ Example pseudo format:
 <15-bit unsigned number> (Minor version)
 <15-bit unsigned number> (Subminor version)
 <some set of (C?) string key value pairs of metadata>
+<some affine definitin of the coordinate system?>
 number of dimensions (unsigned 63 bit type)
-dimension granularity bit count (all dimensions are unsigned). This field
-  describes the number of bits each following dimension number takes up.
-  Valid values are 1 to 65536. Each number is encoded to the nearest
-  8-bit boundary. So a value of 5 says store a 5 bit number in the next
-  8 bits.
-dimension 0 : (a number of size specified by the within the granularity
- specified above)
-equation string 0 (and an equation string specifying calibration)
-  it's a C? string. calibration can be ignored if desired. if calibration
-  is specified the equation language is specified below.
+dimension granularity byte count (all dimensions are unsigned). This
+  field describes the number of 8-bit bytes each following dimension
+  number is specified with. Valid values are 1 to 65536.
+dimension 0 : (a number within the granularity specified above)
 ...
 dimension n-1 : (a number within the granularity specified above)
-equation string n-1 (and an equation string specifying calibration)
 <the type of numeric data entries that follow in subentities
   INT [numbits between 1 and 65536]
   UINT [numbits between 1 and 65536]
