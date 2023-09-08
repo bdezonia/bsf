@@ -102,3 +102,112 @@ Notes/questions
     records but not just of one kind of number. This would allow CMYK or
     YUV etc. but there is no inferring from a record type that it is a
     CMYK etc.
+    
+    
+MUCH LATER IDEAS
+
+Let's simplify a lot
+
+A BSF file is an n-dimensional set of data records.
+
+Each BSF file contains one kind of data record type. The
+BSF header defines the structure of the data records.
+
+A record is described as ...
+  a list of int32 codes
+    binary "1": signed integer. followed by a number of bits.
+    binary "2": unsigned integer. followed by a number of bits.
+    binary "3": ieee 8 bit float
+    binary "4": ieee 16 bit float
+    binary "5": ieee 32 bit float
+    binary "6": ieee 64 bit float
+    binary "7": ieee 128 bit float
+    binary "8": utf16 char array. followed by a number specifying the size of the array.
+      will these chars pack well given that each char can be a different size?
+    binary "-1" : end of record
+    
+a record definition is a list of consecutive codes 
+
+And a default value for a record can be defined in the header.
+
+  encoded matching the definition in the header
+    (for instance someone could set to zeroes or NaN or blank strings etc)
+
+  (it could be that when you define the record you also define the
+    default value for each field instead of defnining a separate "zero"
+    value record.)
+
+a record definition also has a 512 char array name
+        
+A BSF file specifies it's number and size of dimensions.
+
+All numbers in a BSF file are saved in big endian format.
+All characters in a BSF file are saved as UTF16.
+
+Each record in a BSF file is preceded with the coordinates
+of the point. The coordinate system is that the origin of
+the data is always at the zero point of every axis with
+each axis growing away from 0 in a positive direction.
+
+Since the file specifies a default values record you can
+write sparse files by only enumerating points that have
+non-default values. Everything else in the file will be
+set to the default record value.
+
+There are some reserved record names. You can define your
+own record name or better yet register them here within
+this repo. I will document them as possible.
+
+Reserved record names:
+
+are strings going to factor into this?
+strX : X is any number and is the number of UTF16 chars in the string
+intX  : X is any number and is the bits contained in the int
+uintX  : X is any number and is the bits contained in the unsigned int
+ieee16 : ieee float 16 (half precision)
+ieee32 : ieee float 32 (single precision)
+ieee64 : ieee float 64 (double precision)
+ieee128 : ieee float 128 (quad precision)
+rgb24 : a record of three 8 bit numbers representing an RGB color
+rgb48 : a record of three 16 bit numbers representing an RGB color
+rgb72 : a record of three 24 bit numbers representing an RGB color
+rgb96 : a record of three 32 bit numbers representing an RGB color
+argb32 : a record of four 8 bit numbers representing an ARGB color
+argb64 : a record of four 16 bit numbers representing an ARGB color
+argb96 : a record of four 24 bit numbers representing an ARGB color
+argb128 : a record of four 32 bit numbers representing an ARGB color
+yuv
+cmyk
+labcie
+hsv or hsb or hsl or all of them
+bcd?
+decimal?
+etc.
+
+Header
+
+BSFF
+<int32>  : version of file format
+<record definition>
+<default record value>
+<data records section>
+
+
+The data section records is just
+
+<dim 1 value><dim 2 value><...><dim n value><record value>
+
+dims go from 0 to max-1. I think 0-based
+is best for simple file reading into arrays.
+
+And continues like this until the end of the file.
+
+(One weakness of format: Due to sparseness a file that
+just ends due to bad communications with disk or across
+network maybe look complete. I think I need an EOF marker.>
+
+eof marker could be -100. -100 is never a valid dimension
+
+
+so how could you use this system to specify a record that
+was a 4x4 matrix or a 10 element vector or some tensor?
