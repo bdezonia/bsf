@@ -211,3 +211,8 @@ eof marker could be -100. -100 is never a valid dimension
 
 so how could you use this system to specify a record that
 was a 4x4 matrix or a 10 element vector or some tensor?
+
+  a "conglomerate" type that has a backing number type
+  and n-dims. a vector would be 1 dim of numbers. a matrix
+  would be two dims of numbers. a thensor would be n dims
+  of data. note that the backing type could be strings too.
